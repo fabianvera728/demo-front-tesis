@@ -59,15 +59,15 @@ const DatasetList: React.FC = () => {
 
   if (error) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-red-600 mb-4">{error}</p>
+      <div className="text-center bg-white rounded-lg shadow-sm p-6">
+        <p className="text-rose-600 mb-4">{error}</p>
         <Button onClick={() => window.location.reload()}>Retry</Button>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="bg-white rounded-lg shadow-md p-6 max-w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold text-gray-900">My Datasets</h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">

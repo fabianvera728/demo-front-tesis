@@ -20,7 +20,7 @@ const Sidebar: React.FC = () => {
     <aside className="w-64 bg-white shadow-md h-full flex flex-col">
       {/* Logo */}
       <div className="p-4 border-b border-gray-200">
-        <Link to="/" className="text-blue-600 font-bold text-xl flex items-center">
+        <Link to="/" className="text-gray-800 font-bold text-xl flex items-center">
           <FeatherIcon icon="database" className="mr-2 h-6 w-6" />
           DataHub
         </Link>
@@ -29,7 +29,7 @@ const Sidebar: React.FC = () => {
       {/* User Profile */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center mb-3">
-          <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full bg-blue-500 text-white flex items-center justify-center">
             {user?.name.charAt(0).toUpperCase()}
           </div>
           <div className="ml-3">
@@ -63,7 +63,7 @@ const Sidebar: React.FC = () => {
             className={({ isActive }) => 
               isActive 
                 ? 'bg-blue-100 text-blue-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
             }
           >
             <FeatherIcon 
@@ -78,7 +78,7 @@ const Sidebar: React.FC = () => {
             className={({ isActive }) => 
               isActive 
                 ? 'bg-blue-100 text-blue-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
             }
           >
             <FeatherIcon 
@@ -93,7 +93,7 @@ const Sidebar: React.FC = () => {
             className={({ isActive }) => 
               isActive 
                 ? 'bg-blue-100 text-blue-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
             }
           >
             <FeatherIcon 
@@ -108,7 +108,7 @@ const Sidebar: React.FC = () => {
             className={({ isActive }) => 
               isActive 
                 ? 'bg-blue-100 text-blue-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
             }
           >
             <FeatherIcon 

@@ -8,7 +8,7 @@ interface DatasetCardProps {
 
 const DatasetCard: React.FC<DatasetCardProps> = ({ dataset }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200 hover:border-gray-300">
       <div className="p-4">
         <div className="flex justify-between items-start">
           <h3 className="text-lg font-semibold text-gray-900 truncate">{dataset.name}</h3>

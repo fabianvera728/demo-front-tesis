@@ -20,10 +20,10 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   // Tailwind classes based on variant
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
-    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm',
+    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-sm',
     outline: 'bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-50',
-    danger: 'bg-red-600 hover:bg-red-700 text-white'
+    danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm'
   };
 
   return (

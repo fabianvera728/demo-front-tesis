@@ -59,7 +59,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
       </div>
       <input
         type="text"
-        className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+        className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm"
         placeholder={placeholder}
         value={inputValue}
         onChange={handleChange}
