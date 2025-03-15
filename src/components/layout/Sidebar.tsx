@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 
 const Sidebar: React.FC = () => {
   return (
-    <aside className="w-64 bg-white shadow-md">
+    <aside className="w-64 bg-white shadow-md h-full">
       <nav className="mt-5 px-2">
         <div className="space-y-1">
           <NavLink 

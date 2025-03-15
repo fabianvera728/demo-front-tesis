@@ -53,6 +53,42 @@ export const mockDatasets: Dataset[] = [
     columnCount: 15,
     tags: ['analytics', 'web', 'traffic', 'quarterly'],
     isPublic: true
+  },
+  {
+    id: '1',
+    name: 'Sales Data 2023',
+    description: 'Monthly sales data for all regions in 2023. Includes product categories, sales representatives, and revenue figures.',
+    createdAt: '2023-01-15T08:30:00Z',
+    updatedAt: '2023-03-20T14:45:00Z',
+    userId: '1',
+    rowCount: 1250,
+    columnCount: 8,
+    tags: ['sales', 'finance', '2023', 'monthly'],
+    isPublic: true
+  },
+  {
+    id: '2',
+    name: 'Customer Feedback',
+    description: 'Survey responses from customers about our new product line. Information',
+    createdAt: '2023-02-10T10:15:00Z',
+    updatedAt: '2023-02-10T10:15:00Z',
+    userId: '1',
+    rowCount: 532,
+    columnCount: 12,
+    tags: ['feedback', 'survey', 'customers', 'product'],
+    isPublic: false
+  },
+  {
+    id: '3',
+    name: 'Website Analytics',
+    description: 'Traffic data from our website including page views, bounce rates, and conversion metrics for the last quarter.',
+    createdAt: '2023-03-05T16:20:00Z',
+    updatedAt: '2023-04-12T09:30:00Z',
+    userId: '1',
+    rowCount: 890,
+    columnCount: 15,
+    tags: ['analytics', 'web', 'traffic', 'quarterly'],
+    isPublic: true
   }
 ];
 

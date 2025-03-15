@@ -48,55 +48,58 @@ const DatasetTable: React.FC<DatasetTableProps> = ({ columns, rows }) => {
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full border border-gray-200 rounded-lg">
       {rows.length === 0 ? (
         <div className="py-8 text-center text-gray-500">
           <p>No data available</p>
         </div>
       ) : (
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.id}
-                  onClick={() => requestSort(column.name)}
-                  className={`
-                    px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer
-                    ${getSortDirection(column.name) ? 'bg-gray-100' : ''}
-                  `}
-                >
-                  <div className="flex items-center">
-                    <span>{column.name}</span>
-                    <span className="ml-1">
-                      {getSortDirection(column.name) === 'ascending' ? '↑' : 
-                       getSortDirection(column.name) === 'descending' ? '↓' : ''}
-                    </span>
-                  </div>
-                  {column.description && (
-                    <span className="block text-xs font-normal text-gray-400 normal-case">
-                      {column.description}
-                    </span>
-                  )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {sortedRows.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50">
+        <div className="block w-full overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
                 {columns.map((column) => (
-                  <td 
-                    key={`${row.id}-${column.id}`}
-                    className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                  <th
+                    key={column.id}
+                    onClick={() => requestSort(column.name)}
+                    className={`
+                      px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer
+                      ${getSortDirection(column.name) ? 'bg-gray-100' : ''}
+                    `}
+                    style={{ minWidth: '150px' }}
                   >
-                    {formatCellValue(row[column.name], column.type)}
-                  </td>
+                    <div className="flex items-center">
+                      <span>{column.name}</span>
+                      <span className="ml-1">
+                        {getSortDirection(column.name) === 'ascending' ? '↑' : 
+                         getSortDirection(column.name) === 'descending' ? '↓' : ''}
+                      </span>
+                    </div>
+                    {column.description && (
+                      <span className="block text-xs font-normal text-gray-400 normal-case">
+                        {column.description}
+                      </span>
+                    )}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedRows.map((row) => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {columns.map((column) => (
+                    <td 
+                      key={`${row.id}-${column.id}`}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                    >
+                      {formatCellValue(row[column.name], column.type)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

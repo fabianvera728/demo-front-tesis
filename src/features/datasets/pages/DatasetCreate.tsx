@@ -60,7 +60,7 @@ const DatasetCreate: React.FC = () => {
   const parseCSV = (): any[] => {
     if (!csvData.trim()) return [];
     
-    const lines = csvData.trim().split('\\n');
+    const lines = csvData.trim().split('\n');
     if (lines.length <= 1) return [];
     
     const headers = lines[0].split(',').map(h => h.trim());
@@ -120,15 +120,38 @@ const DatasetCreate: React.FC = () => {
     navigate('/datasets');
   };
 
+  const handleBack = () => {
+    navigate('/datasets');
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="mb-6">
+    <div className="bg-white rounded-lg shadow-md p-6 max-w-full overflow-x-hidden">
+      <div className="flex items-center mb-6">
+        <button 
+          className="flex items-center text-gray-600 hover:text-blue-600 mr-4" 
+          onClick={handleBack}
+        >
+          <svg 
+            className="h-5 w-5 mr-1" 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back
+        </button>
         <h1 className="text-2xl font-bold text-gray-900">Create New Dataset</h1>
       </div>
       
       {error && <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-md">{error}</div>}
       
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="overflow-x-hidden">
         <div className="mb-8">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
           
@@ -185,8 +208,8 @@ const DatasetCreate: React.FC = () => {
           
           <div className="space-y-3 mb-4">
             {columns.map((column, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <div className="flex-1">
+              <div key={index} className="flex flex-wrap md:flex-nowrap items-end gap-2">
+                <div className="w-full md:flex-1">
                   <Input
                     label={index === 0 ? "Column Name" : ""}
                     value={column.name}
@@ -195,12 +218,14 @@ const DatasetCreate: React.FC = () => {
                   />
                 </div>
                 
-                <div className="w-40">
-                  {index === 0 && <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>}
+                <div className="w-full md:w-40">
+                  <div className="mb-1">
+                    {index === 0 && <label className="block text-sm font-medium text-gray-700">Type</label>}
+                  </div>
                   <select
                     value={column.type}
                     onChange={(e) => handleColumnChange(index, 'type', e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full mb-4 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="string">Text</option>
                     <option value="number">Number</option>
@@ -213,7 +238,7 @@ const DatasetCreate: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => removeColumn(index)}
-                  className="mt-6 p-1 rounded-full text-gray-400 hover:text-red-500 focus:outline-none"
+                  className="p-3 mb-4 rounded-full text-gray-400 hover:text-red-500 focus:outline-none"
                   disabled={columns.length <= 1}
                   aria-label="Remove column"
                 >
@@ -248,17 +273,26 @@ const DatasetCreate: React.FC = () => {
               onChange={handleCsvChange}
               rows={10}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm font-mono text-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="column1,column2,column3&#10;value1,value2,value3&#10;value4,value5,value6"
+              placeholder="name,age,email\nJohn Doe,30,john@example.com\nJane Smith,25,jane@example.com"
             />
           </div>
         </div>
         
         <div className="flex justify-end space-x-3">
-          <Button type="button" variant="outline" onClick={handleCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
             Cancel
           </Button>
-          <Button type="submit" isLoading={isLoading}>
-            Create Dataset
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Creating...' : 'Create Dataset'}
           </Button>
         </div>
       </form>

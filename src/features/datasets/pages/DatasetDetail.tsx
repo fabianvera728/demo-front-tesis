@@ -91,9 +91,9 @@ const DatasetDetail: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center">
+    <div className="bg-white rounded-lg shadow-md p-6 max-w-full">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+        <div className="flex items-center mb-4 md:mb-0">
           <button 
             className="flex items-center text-gray-600 hover:text-blue-600 mr-4" 
             onClick={handleBack}
@@ -113,7 +113,7 @@ const DatasetDetail: React.FC = () => {
             </svg>
             Back
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">{dataset.name}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 truncate">{dataset.name}</h1>
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={handleEdit}>Edit</Button>
@@ -123,8 +123,8 @@ const DatasetDetail: React.FC = () => {
       
       <div className="mb-6">
         <p className="text-gray-600 mb-4">{dataset.description}</p>
-        <div className="flex justify-between items-center">
-          <div className="flex space-x-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+          <div className="flex space-x-6 mb-4 sm:mb-0">
             <div className="text-center">
               <span className="block text-xl font-semibold text-blue-600">{dataset.rowCount}</span>
               <span className="text-sm text-gray-500">Rows</span>
@@ -152,10 +152,12 @@ const DatasetDetail: React.FC = () => {
         />
       </div>
       
-      <DatasetTable 
-        columns={dataset.columns} 
-        rows={filteredRows} 
-      />
+      <div className="w-full">
+        <DatasetTable 
+          columns={dataset.columns} 
+          rows={filteredRows} 
+        />
+      </div>
     </div>
   );
 };
