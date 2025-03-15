@@ -6,10 +6,6 @@ const setCurrentUser = (user: any) => {
   (window as any).currentMockUser = user;
 };
 
-const getCurrentUser = () => {
-  return (window as any).currentMockUser;
-};
-
 export const mockAuthService = {
   async login(email: string, password: string) {
     await delay(800);

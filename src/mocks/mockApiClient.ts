@@ -29,8 +29,8 @@ const createMockErrorResponse = (message: string, status: number = 400) => {
 
 // Mock API client
 export const mockApiClient = {
-  get: async <T = any>(url: string, config?: any): Promise<AxiosResponse<T>> => {
-    console.log(`Mock GET request to ${url}`, config);
+  get: async <T = any>(url: string, _config?: any): Promise<AxiosResponse<T>> => {
+    console.log(`Mock GET request to ${url}`, _config);
     
     try {
       // Auth endpoints
@@ -53,7 +53,7 @@ export const mockApiClient = {
       
       if (url.match(/\/datasets\/[^/]+\/search$/)) {
         const id = url.split('/')[2];
-        const query = config?.params?.query || '';
+        const query = _config?.params?.query || '';
         const rows = await mockDatasetService.searchDatasetRows(id, query);
         return createMockResponse<T>(rows as unknown as T);
       }
@@ -67,7 +67,7 @@ export const mockApiClient = {
     }
   },
   
-  post: async <T = any>(url: string, data: any, config?: any): Promise<AxiosResponse<T>> => {
+  post: async <T = any>(url: string, data: any, _config?: any): Promise<AxiosResponse<T>> => {
     console.log(`Mock POST request to ${url}`, data);
     
     try {
@@ -120,7 +120,7 @@ export const mockApiClient = {
     }
   },
   
-  put: async <T = any>(url: string, data: any, config?: any): Promise<AxiosResponse<T>> => {
+  put: async <T = any>(url: string, data: any, _config?: any): Promise<AxiosResponse<T>> => {
     console.log(`Mock PUT request to ${url}`, data);
     
     try {
@@ -140,7 +140,7 @@ export const mockApiClient = {
     }
   },
   
-  patch: async <T = any>(url: string, data: any, config?: any): Promise<AxiosResponse<T>> => {
+  patch: async <T = any>(url: string, data: any, _config?: any): Promise<AxiosResponse<T>> => {
     console.log(`Mock PATCH request to ${url}`, data);
     
     try {
@@ -160,7 +160,7 @@ export const mockApiClient = {
     }
   },
   
-  delete: async <T = any>(url: string, config?: any): Promise<AxiosResponse<T>> => {
+  delete: async <T = any>(url: string, _config?: any): Promise<AxiosResponse<T>> => {
     console.log(`Mock DELETE request to ${url}`);
     
     try {
