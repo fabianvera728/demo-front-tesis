@@ -1,4 +1,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import { mockApiClient } from '@/mocks/mockApiClient';
+
+// Flag to determine if we should use mock API
+const USE_MOCK_API = true; // Set to false when you have a real backend
 
 // Create base axios instance
 const axiosInstance: AxiosInstance = axios.create({
@@ -40,24 +44,26 @@ axiosInstance.interceptors.response.use(
 );
 
 // Type-safe API client
-export const apiClient = {
-  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return axiosInstance.get<T>(url, config);
-  },
-  
-  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return axiosInstance.post<T>(url, data, config);
-  },
-  
-  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return axiosInstance.put<T>(url, data, config);
-  },
-  
-  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return axiosInstance.patch<T>(url, data, config);
-  },
-  
-  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
-    return axiosInstance.delete<T>(url, config);
-  },
-}; 
+export const apiClient = USE_MOCK_API
+  ? mockApiClient
+  : {
+      get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+        return axiosInstance.get<T>(url, config);
+      },
+      
+      post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+        return axiosInstance.post<T>(url, data, config);
+      },
+      
+      put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+        return axiosInstance.put<T>(url, data, config);
+      },
+      
+      patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+        return axiosInstance.patch<T>(url, data, config);
+      },
+      
+      delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> => {
+        return axiosInstance.delete<T>(url, config);
+      },
+    }; 

@@ -41,7 +41,8 @@ export const authService = {
       setToken(response.data.token);
       return response.data.user;
     } catch (error) {
-      throw new Error('Login failed');
+      console.error('Login error:', error);
+      throw new Error('Invalid email or password');
     }
   },
 
@@ -56,6 +57,7 @@ export const authService = {
       setToken(response.data.token);
       return response.data.user;
     } catch (error) {
+      console.error('Registration error:', error);
       throw new Error('Registration failed');
     }
   },
@@ -64,6 +66,7 @@ export const authService = {
     try {
       await apiClient.post('/auth/logout');
     } catch (error) {
+      console.error('Logout error:', error);
       // Ignore errors on logout
     } finally {
       removeToken();
@@ -81,6 +84,7 @@ export const authService = {
       const response = await apiClient.get<User>('/auth/me');
       return response.data;
     } catch (error) {
+      console.error('Get current user error:', error);
       removeToken();
       throw new Error('Failed to get current user');
     }

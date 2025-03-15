@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/authService';
+import { authService } from '@/services/authService';
 
 interface User {
   id: string;
@@ -16,7 +16,17 @@ interface AuthContextType {
   register: (email: string, password: string, name: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Provide a default value for the context to avoid the undefined check
+const defaultContextValue: AuthContextType = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: true,
+  login: async () => { throw new Error('AuthContext not initialized'); },
+  logout: async () => { throw new Error('AuthContext not initialized'); },
+  register: async () => { throw new Error('AuthContext not initialized'); },
+};
+
+const AuthContext = createContext<AuthContextType>(defaultContextValue);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -25,14 +35,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Check if user is already logged in
     const checkAuthStatus = async () => {
-      try {
-        const userData = await authService.getCurrentUser();
-        setUser(userData);
-      } catch (error) {
+      if (authService.isAuthenticated()) {
+        try {
+          const userData = await authService.getCurrentUser();
+          setUser(userData);
+        } catch (error) {
+          console.error('Error getting current user:', error);
+          setUser(null);
+        }
+      } else {
         setUser(null);
-      } finally {
-        setIsLoading(false);
       }
+      setIsLoading(false);
     };
 
     checkAuthStatus();
@@ -82,8 +96,5 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
   return context;
 }; 
