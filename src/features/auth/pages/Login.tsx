@@ -1,17 +1,27 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useAuth } from '@/context/AuthContext';
 
+interface LocationState {
+  from?: {
+    pathname: string;
+  };
+}
+
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [error, setError] = useState('');
+
+  // Get the previous location (if any)
+  const from = (location.state as LocationState)?.from || { pathname: '/' };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -24,7 +34,8 @@ const Login = () => {
     
     try {
       await login(formData.email, formData.password);
-      navigate('/');
+      // Redirect to the page they were trying to access, or home if none
+      navigate(from.pathname, { replace: true });
     } catch (err) {
       setError('Invalid email or password');
     }
