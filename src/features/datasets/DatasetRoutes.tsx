@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import DatasetList from './pages/DatasetList';
 import DatasetDetail from './pages/DatasetDetail';
 import DatasetCreate from './pages/DatasetCreate';
+import DatasetEdit from './pages/DatasetEdit';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
 const DatasetRoutes = () => {
@@ -28,6 +29,14 @@ const DatasetRoutes = () => {
         element={
           <ProtectedRoute>
             <DatasetDetail />
+          </ProtectedRoute>
+        } 
+      />
+      <Route 
+        path="/:id/edit" 
+        element={
+          <ProtectedRoute>
+            <DatasetEdit />
           </ProtectedRoute>
         } 
       />

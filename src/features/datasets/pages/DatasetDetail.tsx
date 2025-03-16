@@ -4,6 +4,7 @@ import { datasetService } from '@/services/datasetService';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SearchInput from '@/components/ui/SearchInput';
+import Modal from '@/components/ui/Modal';
 import DatasetTable from '../components/DatasetTable';
 import { DatasetDetail as DatasetDetailType } from '@/types/dataset';
 
@@ -15,6 +16,8 @@ const DatasetDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const fetchDataset = async () => {
@@ -64,16 +67,25 @@ const DatasetDetail: React.FC = () => {
     }
   };
 
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
   const handleDelete = async () => {
     if (!id) return;
     
-    if (window.confirm('Are you sure you want to delete this dataset? This action cannot be undone.')) {
-      try {
-        await datasetService.deleteDataset(id);
-        navigate('/datasets');
-      } catch (err) {
-        alert('Failed to delete dataset. Please try again.');
-      }
+    try {
+      setIsDeleting(true);
+      await datasetService.deleteDataset(id);
+      closeDeleteModal();
+      navigate('/datasets');
+    } catch (err) {
+      setIsDeleting(false);
+      setError('Failed to delete dataset. Please try again.');
     }
   };
 
@@ -117,7 +129,7 @@ const DatasetDetail: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={handleEdit}>Edit</Button>
-          <Button variant="danger" onClick={handleDelete}>Delete</Button>
+          <Button variant="danger" onClick={openDeleteModal}>Delete</Button>
         </div>
       </div>
       
@@ -158,6 +170,29 @@ const DatasetDetail: React.FC = () => {
           rows={filteredRows} 
         />
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        title="Delete Dataset"
+        footer={
+          <>
+            <Button variant="outline" onClick={closeDeleteModal} disabled={isDeleting}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </>
+        }
+      >
+        <p className="text-gray-700">
+          Are you sure you want to delete the dataset <span className="font-semibold">{dataset.name}</span>?
+        </p>
+        <p className="text-gray-700 mt-2">
+          This action cannot be undone and all data will be permanently lost.
+        </p>
+      </Modal>
     </div>
   );
 };
