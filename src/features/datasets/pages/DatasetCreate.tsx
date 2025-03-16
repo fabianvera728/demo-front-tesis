@@ -4,6 +4,7 @@ import { datasetService } from '@/services/datasetService';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { CreateDatasetPayload, DatasetColumn } from '@/types/dataset';
+import FeatherIcon from 'feather-icons-react';
 
 const DatasetCreate: React.FC = () => {
   const navigate = useNavigate();
@@ -131,19 +132,10 @@ const DatasetCreate: React.FC = () => {
           className="flex items-center text-gray-600 hover:text-blue-600 mr-4" 
           onClick={handleBack}
         >
-          <svg 
+          <FeatherIcon 
+            icon="arrow-left" 
             className="h-5 w-5 mr-1" 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
+          />
           Back
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Create New Dataset</h1>
@@ -242,9 +234,10 @@ const DatasetCreate: React.FC = () => {
                   disabled={columns.length <= 1}
                   aria-label="Remove column"
                 >
-                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
+                  <FeatherIcon 
+                    icon="x-circle" 
+                    className="h-5 w-5" 
+                  />
                 </button>
               </div>
             ))}

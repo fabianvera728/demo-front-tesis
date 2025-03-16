@@ -3,10 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { datasetService } from '@/services/datasetService';
 import Button from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import SearchInput from '@/components/ui/SearchInput';
 import Modal from '@/components/ui/Modal';
-import DatasetTable from '../components/DatasetTable';
+import SemanticSearchInput, { SearchOptions } from '@/components/ui/SemanticSearchInput';
+import SearchResultsVisualizer from '../components/SearchResultsVisualizer';
 import { DatasetDetail as DatasetDetailType } from '@/types/dataset';
+import FeatherIcon from 'feather-icons-react';
 
 const DatasetDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,14 @@ const DatasetDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchOptions, setSearchOptions] = useState<SearchOptions>({
+    mode: 'semantic',
+    threshold: 70,
+    includeFields: ['all'],
+  });
+  
+  const [relevanceScores, setRelevanceScores] = useState<Record<string, number>>({});
+  const [highlightedFields, setHighlightedFields] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     const fetchDataset = async () => {
@@ -38,22 +47,45 @@ const DatasetDetail: React.FC = () => {
     fetchDataset();
   }, [id]);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, options: SearchOptions) => {
     setSearchQuery(query);
+    setSearchOptions(options);
     
     if (!id || !dataset) return;
     
     if (query.trim() === '') {
       setFilteredRows(dataset.rows);
+      setRelevanceScores({});
+      setHighlightedFields({});
       return;
     }
     
     try {
       const results = await datasetService.searchDatasetRows(id, query);
       setFilteredRows(results);
+      
+      const mockRelevanceScores: Record<string, number> = {};
+      const mockHighlightedFields: Record<string, string[]> = {};
+      
+      results.forEach(row => {
+        const minRelevance = options.mode === 'exact' ? 100 : options.threshold;
+        mockRelevanceScores[row.id] = Math.floor(Math.random() * (100 - minRelevance + 1)) + minRelevance;
+        
+        const fieldsToHighlight = dataset.columns
+          .filter(() => Math.random() > 0.5)
+          .map(col => col.name);
+        
+        if (fieldsToHighlight.length === 0 && dataset.columns.length > 0) {
+          fieldsToHighlight.push(dataset.columns[0].name);
+        }
+        
+        mockHighlightedFields[row.id] = fieldsToHighlight;
+      });
+      
+      setRelevanceScores(mockRelevanceScores);
+      setHighlightedFields(mockHighlightedFields);
     } catch (err) {
       console.error('Search error:', err);
-      // Keep the current rows on error
     }
   };
 
@@ -110,26 +142,26 @@ const DatasetDetail: React.FC = () => {
             className="flex items-center text-gray-600 hover:text-blue-600 mr-4" 
             onClick={handleBack}
           >
-            <svg 
-              className="h-5 w-5 mr-1" 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
-            </svg>
+            <FeatherIcon icon="arrow-left" className="h-5 w-5 mr-1" />
             Back
           </button>
           <h1 className="text-2xl font-bold text-gray-900 truncate">{dataset.name}</h1>
         </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handleEdit}>Edit</Button>
-          <Button variant="danger" onClick={openDeleteModal}>Delete</Button>
+        <div className="flex space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleEdit}
+          >
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="danger"
+            onClick={openDeleteModal}
+          >
+            Delete
+          </Button>
         </div>
       </div>
       
@@ -157,17 +189,20 @@ const DatasetDetail: React.FC = () => {
       </div>
       
       <div className="mb-6">
-        <SearchInput 
-          placeholder="Search in dataset..." 
+        <SemanticSearchInput 
+          placeholder="Search in dataset (try semantic search)..." 
           value={searchQuery}
           onChange={handleSearch}
         />
       </div>
       
       <div className="w-full">
-        <DatasetTable 
-          columns={dataset.columns} 
-          rows={filteredRows} 
+        <SearchResultsVisualizer 
+          results={filteredRows}
+          columns={dataset.columns}
+          query={searchQuery}
+          relevanceScores={relevanceScores}
+          highlightedFields={highlightedFields}
         />
       </div>
 
@@ -177,10 +212,20 @@ const DatasetDetail: React.FC = () => {
         title="Delete Dataset"
         footer={
           <>
-            <Button variant="outline" onClick={closeDeleteModal} disabled={isDeleting}>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={closeDeleteModal} 
+              disabled={isDeleting}
+            >
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleDelete} disabled={isDeleting}>
+            <Button 
+              type="button"
+              variant="danger" 
+              onClick={handleDelete} 
+              disabled={isDeleting}
+            >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </>

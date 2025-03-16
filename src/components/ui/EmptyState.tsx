@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import FeatherIcon from 'feather-icons-react';
 
 interface EmptyStateProps {
   title: string;
@@ -22,20 +23,10 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     <div className={`text-center py-12 px-4 ${className}`}>
       {icon || (
         <div className="mx-auto h-12 w-12 text-gray-400">
-          <svg
+          <FeatherIcon
+            icon="alert-circle"
             className="h-full w-full"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
+          />
         </div>
       )}
       <h3 className="mt-4 text-lg font-medium text-gray-900">{title}</h3>

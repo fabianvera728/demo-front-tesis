@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Modal from '@/components/ui/Modal';
 import { UpdateDatasetPayload, DatasetDetail } from '@/types/dataset';
+import FeatherIcon from 'feather-icons-react';
 
 const DatasetEdit: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -136,19 +137,10 @@ const DatasetEdit: React.FC = () => {
           className="flex items-center text-gray-600 hover:text-blue-600 mr-4" 
           onClick={handleCancel}
         >
-          <svg 
+          <FeatherIcon 
+            icon="arrow-left" 
             className="h-5 w-5 mr-1" 
-            xmlns="http://www.w3.org/2000/svg" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
+          />
           Back
         </button>
         <h1 className="text-2xl font-bold text-gray-900">Edit Dataset</h1>
