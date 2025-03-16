@@ -6,6 +6,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Modal from '@/components/ui/Modal';
 import SemanticSearchInput, { SearchOptions } from '@/components/ui/SemanticSearchInput';
 import SearchResultsVisualizer from '../components/SearchResultsVisualizer';
+import DataVisualizations from '../components/DataVisualizations';
 import { DatasetDetail as DatasetDetailType } from '@/types/dataset';
 import FeatherIcon from 'feather-icons-react';
 
@@ -19,7 +20,7 @@ const DatasetDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [_, setSearchOptions] = useState<SearchOptions>({
+  const [searchOptions, setSearchOptions] = useState<SearchOptions>({
     mode: 'semantic',
     threshold: 70,
     includeFields: ['all'],
@@ -193,6 +194,21 @@ const DatasetDetail: React.FC = () => {
           placeholder="Search in dataset (try semantic search)..." 
           value={searchQuery}
           onChange={handleSearch}
+        />
+      </div>
+      
+      <div className="mb-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Visualizaciones</h2>
+        <DataVisualizations
+          results={filteredRows}
+          columns={dataset.columns}
+          query={searchQuery || ""}
+          relevanceScores={relevanceScores}
+          highlightedFields={highlightedFields}
+          onWordClick={(word) => {
+            setSearchQuery(word);
+            handleSearch(word, searchOptions);
+          }}
         />
       </div>
       
