@@ -19,7 +19,7 @@ const DatasetDetail: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [searchOptions, setSearchOptions] = useState<SearchOptions>({
+  const [_, setSearchOptions] = useState<SearchOptions>({
     mode: 'semantic',
     threshold: 70,
     includeFields: ['all'],
