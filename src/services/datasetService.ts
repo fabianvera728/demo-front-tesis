@@ -107,7 +107,8 @@ export const datasetService = {
           tags: payload.tags,
           is_public: payload.isPublic,
           columns: payload.columns,
-          rows: payload.rows
+          rows: payload.rows,
+          prompt_strategy: payload.prompt_strategy
         }
       );
       return response.data;

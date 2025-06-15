@@ -65,6 +65,20 @@ export interface PaginationParams {
   offset: number;
 }
 
+// Tipos para Embeddings Contextales
+export interface EmbeddingPromptTemplate {
+  template: string;
+  description: string;
+  field_mappings?: Record<string, string>;
+  metadata?: Record<string, any>;
+}
+
+export interface EmbeddingPromptStrategy {
+  strategy_type: 'concatenate' | 'simple_prompt' | 'template';
+  simple_prompt?: string;
+  prompt_template?: EmbeddingPromptTemplate;
+}
+
 export interface CreateDatasetPayload {
   name: string;
   description: string;
@@ -72,6 +86,8 @@ export interface CreateDatasetPayload {
   isPublic: boolean;
   columns: Omit<DatasetColumn, 'id'>[];
   rows: Omit<DatasetRow, 'id'>[];
+  // Nueva funcionalidad para prompts contextuales
+  prompt_strategy?: EmbeddingPromptStrategy;
 }
 
 export interface UpdateDatasetPayload {

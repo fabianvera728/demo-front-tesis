@@ -226,16 +226,9 @@ const SemanticSearchInput: React.FC<SemanticSearchInputProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Embedding Model
               </label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                value={searchOptions.modelName || "default"}
-                onChange={(e) => handleOptionChange({ modelName: e.target.value === "default" ? undefined : e.target.value })}
-              >
-                <option value="default">Default (multilingual-MiniLM-L12-v2)</option>
-                <option value="sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2 (English, faster)</option>
-                <option value="sentence-transformers/all-mpnet-base-v2">all-mpnet-base-v2 (English, higher quality)</option>
-                <option value="sentence-transformers/paraphrase-multilingual-mpnet-base-v2">paraphrase-multilingual-mpnet-base-v2 (Multilingual, higher quality)</option>
-              </select>
+              <div className="px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-700 sm:text-sm">
+                sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2 (Multilingual)
+              </div>
               <div className="text-xs text-gray-500 mt-1">
                 Diferentes modelos pueden dar resultados más precisos dependiendo del idioma y tipo de búsqueda.
               </div>

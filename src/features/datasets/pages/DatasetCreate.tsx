@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { datasetService } from '@/services/datasetService';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { CreateDatasetPayload, DatasetColumn } from '@/types/dataset';
+import { CreateDatasetPayload, DatasetColumn, EmbeddingPromptStrategy } from '@/types/dataset';
 import FeatherIcon from 'feather-icons-react';
 
 const DatasetCreate: React.FC = () => {
@@ -30,6 +30,21 @@ const DatasetCreate: React.FC = () => {
   const [csvData, setCsvData] = useState<string>('');
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+
+  // Estado para configuración de embeddings contextuales
+  const [embeddingConfig, setEmbeddingConfig] = useState<{
+    useCustomPrompt: boolean;
+    promptType: 'simple' | 'template';
+    simplePrompt: string;
+    promptTemplate: string;
+    previewText: string;
+  }>({
+    useCustomPrompt: false,
+    promptType: 'simple',
+    simplePrompt: '',
+    promptTemplate: '',
+    previewText: ''
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -252,6 +267,31 @@ const DatasetCreate: React.FC = () => {
     try {
       setIsLoading(true);
       
+      // Construir la estrategia de prompt si está habilitada
+      let promptStrategy: EmbeddingPromptStrategy | undefined;
+      
+      if (embeddingConfig.useCustomPrompt) {
+        if (embeddingConfig.promptType === 'simple' && embeddingConfig.simplePrompt.trim()) {
+          promptStrategy = {
+            strategy_type: 'simple_prompt',
+            simple_prompt: embeddingConfig.simplePrompt.trim()
+          };
+        } else if (embeddingConfig.promptType === 'template' && embeddingConfig.promptTemplate.trim()) {
+          promptStrategy = {
+            strategy_type: 'template',
+            prompt_template: {
+              template: embeddingConfig.promptTemplate.trim(),
+              description: `Template personalizado para dataset: ${formData.name}`,
+              field_mappings: {},
+              metadata: {
+                created_at: new Date().toISOString(),
+                created_by: 'user' // TODO: obtener del contexto de usuario
+              }
+            }
+          };
+        }
+      }
+
       const payload: CreateDatasetPayload = {
         name: formData.name,
         description: formData.description,
@@ -259,6 +299,7 @@ const DatasetCreate: React.FC = () => {
         isPublic: formData.isPublic,
         columns,
         rows: validRows, // Use the filtered valid rows
+        prompt_strategy: promptStrategy // Agregar la estrategia de prompt
       };
       
       const createdDataset = await datasetService.createDataset(payload);
@@ -282,6 +323,47 @@ const DatasetCreate: React.FC = () => {
     const rows = parseCSV();
     setPreviewData(rows.slice(0, 5)); // Show only first 5 rows
     setShowPreview(true);
+  };
+
+  const generatePromptPreview = () => {
+    const rows = parseCSV();
+    if (rows.length === 0) {
+      setEmbeddingConfig(prev => ({
+        ...prev,
+        previewText: 'No hay datos disponibles para la vista previa'
+      }));
+      return;
+    }
+
+    const sampleRow = rows[0];
+    let previewText = '';
+
+    if (embeddingConfig.promptType === 'simple' && embeddingConfig.simplePrompt) {
+      // Para prompt simple, concatenar campos de texto
+      const textFields = Object.entries(sampleRow)
+        .filter(([key, value]) => key !== 'id' && typeof value === 'string' && value.trim())
+        .map(([, value]) => value)
+        .join(' ');
+      
+      previewText = `${embeddingConfig.simplePrompt}: ${textFields}`;
+    } else if (embeddingConfig.promptType === 'template' && embeddingConfig.promptTemplate) {
+      // Para template, reemplazar placeholders
+      try {
+        previewText = embeddingConfig.promptTemplate;
+        Object.entries(sampleRow).forEach(([key, value]) => {
+          const placeholder = `{${key}}`;
+          previewText = previewText.replace(new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), 
+            value || 'N/A');
+        });
+      } catch (error) {
+        previewText = 'Error en el template. Verifique la sintaxis.';
+      }
+    }
+
+    setEmbeddingConfig(prev => ({
+      ...prev,
+      previewText
+    }));
   };
 
   return (
@@ -474,6 +556,125 @@ const DatasetCreate: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+        
+        {/* Nueva sección: Configuración de Embeddings Contextuales */}
+        <div className="mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Configuración de Embeddings</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            Configure cómo se generarán los embeddings para mejorar la búsqueda semántica
+          </p>
+          
+          <div className="mb-4">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                checked={embeddingConfig.useCustomPrompt}
+                onChange={(e) => setEmbeddingConfig(prev => ({
+                  ...prev,
+                  useCustomPrompt: e.target.checked,
+                  previewText: '' // Reset preview when toggling
+                }))}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-700">
+                Usar prompt personalizado para generar embeddings contextuales
+              </span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1 ml-6">
+              Esto mejorará la calidad de las búsquedas semánticas al estructurar mejor el contenido
+            </p>
+          </div>
+
+          {embeddingConfig.useCustomPrompt && (
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Prompt
+                </label>
+                <select
+                  value={embeddingConfig.promptType}
+                  onChange={(e) => setEmbeddingConfig(prev => ({
+                    ...prev,
+                    promptType: e.target.value as 'simple' | 'template',
+                    previewText: '' // Reset preview when changing type
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="simple">Prompt Simple</option>
+                  <option value="template">Template Avanzado</option>
+                </select>
+              </div>
+
+              {embeddingConfig.promptType === 'simple' ? (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción del Contenido
+                  </label>
+                  <input
+                    type="text"
+                    value={embeddingConfig.simplePrompt}
+                    onChange={(e) => setEmbeddingConfig(prev => ({
+                      ...prev,
+                      simplePrompt: e.target.value,
+                      previewText: '' // Reset preview when changing
+                    }))}
+                    placeholder="Ej: Registro de cliente con información personal y preferencias"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Esta descripción se agregará como prefijo a todos los registros
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Template de Prompt
+                  </label>
+                  <textarea
+                    value={embeddingConfig.promptTemplate}
+                    onChange={(e) => setEmbeddingConfig(prev => ({
+                      ...prev,
+                      promptTemplate: e.target.value,
+                      previewText: '' // Reset preview when changing
+                    }))}
+                    placeholder="Ej: Cliente {nombre} de {edad} años, ubicado en {ciudad}, con preferencia por {categoria_producto}"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Use {`{nombre_columna}`} para insertar valores de las columnas. Columnas disponibles: {columns.map(col => col.name).filter(Boolean).join(', ')}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button 
+                  type="button" 
+                  onClick={generatePromptPreview} 
+                  variant="outline"
+                  disabled={
+                    !csvData.trim() || 
+                    (embeddingConfig.promptType === 'simple' && !embeddingConfig.simplePrompt.trim()) ||
+                    (embeddingConfig.promptType === 'template' && !embeddingConfig.promptTemplate.trim())
+                  }
+                >
+                  Vista Previa del Prompt
+                </Button>
+              </div>
+
+              {embeddingConfig.previewText && (
+                <div className="p-3 bg-white border rounded-md">
+                  <p className="text-sm text-gray-700">
+                    <strong>Vista previa del embedding contextual:</strong>
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2 italic bg-gray-50 p-2 rounded">
+                    "{embeddingConfig.previewText}"
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
