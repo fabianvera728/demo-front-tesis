@@ -28,6 +28,8 @@ const DatasetCreate: React.FC = () => {
   ]);
   
   const [csvData, setCsvData] = useState<string>('');
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
@@ -55,26 +57,143 @@ const DatasetCreate: React.FC = () => {
   };
 
   const handleCsvChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCsvData(e.target.value);
+    const newCsvData = e.target.value;
+    setCsvData(newCsvData);
+    
+    // Reset preview
+    setShowPreview(false);
+    
+    // Auto-update columns based on CSV headers
+    if (newCsvData.trim()) {
+      try {
+        // Parse first line to get headers
+        const firstLine = newCsvData.trim().split('\n')[0];
+        if (!firstLine) return;
+        
+        // Detect delimiter
+        let delimiter = ',';
+        const commaCount = (firstLine.match(/,/g) || []).length;
+        const semicolonCount = (firstLine.match(/;/g) || []).length;
+        const tabCount = (firstLine.match(/\t/g) || []).length;
+        
+        if (semicolonCount > commaCount && semicolonCount > tabCount) {
+          delimiter = ';';
+        } else if (tabCount > commaCount && tabCount > semicolonCount) {
+          delimiter = '\t';
+        }
+        
+        // Parse headers
+        const headers = splitCSVLine(firstLine, delimiter);
+        
+        // Update columns state with the CSV headers
+        if (headers.length > 0) {
+          const newColumns = headers.map(header => ({
+            name: header.trim(),
+            type: 'string' as const
+          }));
+          
+          // Only update if headers are different from current columns
+          const currentColumnNames = columns.map(col => col.name);
+          const newColumnNames = newColumns.map(col => col.name);
+          
+          // Check if arrays are different
+          const isDifferent = newColumnNames.length !== currentColumnNames.length ||
+            newColumnNames.some((name, i) => name !== currentColumnNames[i]);
+          
+          if (isDifferent) {
+            setColumns(newColumns);
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing CSV headers:', e);
+      }
+    }
   };
 
   const parseCSV = (): any[] => {
     if (!csvData.trim()) return [];
     
-    const lines = csvData.trim().split('\n');
+    // Split by newline and filter empty lines
+    const lines = csvData.trim().split('\n').filter(line => line.trim());
     if (lines.length <= 1) return [];
     
-    const headers = lines[0].split(',').map(h => h.trim());
+    // Try to detect delimiter - check for common delimiters (comma, semicolon, tab)
+    const firstLine = lines[0];
+    let delimiter = ','; // default
     
+    // Count occurrences of potential delimiters in first line
+    const commaCount = (firstLine.match(/,/g) || []).length;
+    const semicolonCount = (firstLine.match(/;/g) || []).length;
+    const tabCount = (firstLine.match(/\t/g) || []).length;
+    
+    // Choose the most frequent delimiter
+    if (semicolonCount > commaCount && semicolonCount > tabCount) {
+      delimiter = ';';
+    } else if (tabCount > commaCount && tabCount > semicolonCount) {
+      delimiter = '\t';
+    }
+    
+    // Parse headers
+    const headers = splitCSVLine(lines[0], delimiter);
+    
+    // Parse data rows
     return lines.slice(1).map((line, index) => {
-      const values = line.split(',').map(v => v.trim());
+      const values = splitCSVLine(line, delimiter);
       const row: any = { id: `temp-${index}` };
       
       headers.forEach((header, i) => {
-        row[header] = values[i] || '';
+        // Trim header names to handle possible spaces
+        const cleanHeader = header.trim();
+        // Only assign if there's a value in this position
+        if (i < values.length) {
+          // Asegúrate de que el valor no sea null o undefined
+          row[cleanHeader] = values[i] !== undefined && values[i] !== null ? values[i] : '';
+        } else {
+          row[cleanHeader] = ''; // Add empty string for missing values
+        }
       });
       
+      // Verificar que el objeto row tiene realmente datos (aparte del id)
+      const hasData = Object.keys(row).some(key => key !== 'id' && row[key] !== '');
+      if (!hasData) {
+        console.warn('Fila sin datos detectada:', row);
+      }
+      
       return row;
+    });
+  };
+  
+  // Helper function to correctly split CSV lines respecting quotes
+  const splitCSVLine = (line: string, delimiter: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        // Toggle the inQuotes flag
+        inQuotes = !inQuotes;
+      } else if (char === delimiter && !inQuotes) {
+        // Only split on delimiter if not inside quotes
+        result.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add the last field
+    result.push(current);
+    
+    // Trim quotes and whitespace from each value
+    return result.map(value => {
+      let trimmed = value.trim();
+      if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+        trimmed = trimmed.substring(1, trimmed.length - 1);
+      }
+      return trimmed;
     });
   };
 
@@ -96,6 +215,40 @@ const DatasetCreate: React.FC = () => {
     // Parse CSV data
     const rows = parseCSV();
     
+    // Validate that we have data
+    if (rows.length === 0) {
+      setError('No data found in CSV. Please check the format and try again.');
+      return;
+    }
+    
+    // Log para depuración
+    console.log('Rows a enviar:', rows);
+    
+    // Validate that all rows have the expected columns
+    const columnNames = columns.map(col => col.name.trim());
+    const firstRowKeys = Object.keys(rows[0]).filter(key => key !== 'id');
+    
+    // Check if column names match the CSV headers
+    const missingColumns = columnNames.filter(name => !firstRowKeys.includes(name));
+    if (missingColumns.length > 0) {
+      setError(`The following columns defined don't match the CSV data: ${missingColumns.join(', ')}`);
+      return;
+    }
+    
+    // Ensure all rows have data for at least one column
+    const validRows = rows.filter(row => {
+      return Object.keys(row).some(key => key !== 'id' && row[key] !== '');
+    });
+    
+    if (validRows.length === 0) {
+      setError('No valid data found in CSV. All rows appear to be empty.');
+      return;
+    }
+    
+    if (validRows.length < rows.length) {
+      console.warn(`Filtered out ${rows.length - validRows.length} empty rows`);
+    }
+    
     try {
       setIsLoading(true);
       
@@ -105,7 +258,7 @@ const DatasetCreate: React.FC = () => {
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
         isPublic: formData.isPublic,
         columns,
-        rows,
+        rows: validRows, // Use the filtered valid rows
       };
       
       const createdDataset = await datasetService.createDataset(payload);
@@ -123,6 +276,12 @@ const DatasetCreate: React.FC = () => {
 
   const handleBack = () => {
     navigate('/datasets');
+  };
+
+  const generatePreview = () => {
+    const rows = parseCSV();
+    setPreviewData(rows.slice(0, 5)); // Show only first 5 rows
+    setShowPreview(true);
   };
 
   return (
@@ -269,6 +428,54 @@ const DatasetCreate: React.FC = () => {
               placeholder="name,age,email\nJohn Doe,30,john@example.com\nJane Smith,25,jane@example.com"
             />
           </div>
+            
+          <Button
+            type="button"
+            variant="outline"
+            onClick={generatePreview}
+            disabled={!csvData.trim()}
+            className="mb-4"
+          >
+            Preview Data
+          </Button>
+              
+          {showPreview && previewData.length > 0 && (
+            <div className="mt-4 mb-6 overflow-x-auto">
+              <h3 className="text-md font-medium text-gray-700 mb-2">Data Preview (first 5 rows)</h3>
+              <table className="min-w-full divide-y divide-gray-200 border">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {Object.keys(previewData[0])
+                      .filter(key => key !== 'id')
+                      .map((key, index) => (
+                        <th 
+                          key={index}
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          {key}
+                        </th>
+                      ))}
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {previewData.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {Object.keys(row)
+                        .filter(key => key !== 'id')
+                        .map((key, cellIndex) => (
+                          <td 
+                            key={cellIndex}
+                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                          >
+                            {String(row[key])}
+                          </td>
+                        ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
         
         <div className="flex justify-end space-x-3">

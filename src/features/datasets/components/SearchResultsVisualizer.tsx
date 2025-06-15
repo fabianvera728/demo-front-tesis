@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DatasetRow, DatasetColumn } from '@/types/dataset';
+import PageSizeSelector from '@/components/ui/PageSizeSelector';
 import FeatherIcon from 'feather-icons-react';
 
 interface SearchResultsVisualizerProps {
@@ -8,6 +9,15 @@ interface SearchResultsVisualizerProps {
   query: string;
   relevanceScores?: Record<string, number>; // Map of row ID to relevance score (0-100)
   highlightedFields?: Record<string, string[]>; // Map of row ID to array of field names that matched
+  pagination?: {
+    pageSize: number;
+    onPageSizeChange: (size: number) => void;
+    isSearchActive: boolean;
+    pageSizeOptions: number[];
+    rowCount: number;
+    currentOffset: number;
+    disabled: boolean;
+  };
 }
 
 const SearchResultsVisualizer: React.FC<SearchResultsVisualizerProps> = ({
@@ -16,6 +26,7 @@ const SearchResultsVisualizer: React.FC<SearchResultsVisualizerProps> = ({
   query,
   relevanceScores = {},
   highlightedFields = {},
+  pagination,
 }) => {
   const [viewMode, setViewMode] = useState<'table' | 'cards' | 'relevance'>('table');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
@@ -161,7 +172,7 @@ const SearchResultsVisualizer: React.FC<SearchResultsVisualizerProps> = ({
                             <div className="w-16 bg-gray-200 rounded-full h-2.5">
                               <div 
                                 className="bg-blue-600 h-2.5 rounded-full" 
-                                style={{ width: `${rowRelevance}%` }}
+                                style={{ width: `${Math.min(100, rowRelevance)}%` }}
                               ></div>
                             </div>
                             <span className="ml-2 text-sm text-gray-500">{rowRelevance}%</span>
@@ -275,7 +286,7 @@ const SearchResultsVisualizer: React.FC<SearchResultsVisualizerProps> = ({
                   <div className="w-full bg-gray-200 rounded-full h-1.5">
                     <div 
                       className="bg-blue-600 h-1.5 rounded-full" 
-                      style={{ width: `${rowRelevance}%` }}
+                      style={{ width: `${Math.min(100, rowRelevance)}%` }}
                     ></div>
                   </div>
                   <span className="ml-2 text-xs text-gray-500">{rowRelevance}%</span>
@@ -404,6 +415,20 @@ const SearchResultsVisualizer: React.FC<SearchResultsVisualizerProps> = ({
           </button>
         </div>
       </div>
+      
+      {pagination && !pagination.isSearchActive && (
+        <div className="flex justify-between items-center mb-4">
+          <PageSizeSelector
+            options={pagination.pageSizeOptions}
+            value={pagination.pageSize}
+            onChange={pagination.onPageSizeChange}
+            disabled={pagination.disabled}
+          />
+          <div className="text-sm text-gray-500">
+            Showing rows {pagination.currentOffset + 1} to {Math.min(pagination.currentOffset + pagination.pageSize, pagination.rowCount)} of {pagination.rowCount}
+          </div>
+        </div>
+      )}
       
       {results.length === 0 ? (
         <div className="bg-white rounded-lg shadow-md p-6 text-center">

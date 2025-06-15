@@ -14,6 +14,9 @@ export interface SearchOptions {
   mode: 'semantic' | 'exact' | 'hybrid';
   threshold: number; // 0-100 relevance threshold
   includeFields: string[]; // fields to search in
+  hybridAlpha?: number; // peso para búsqueda híbrida (0-1)
+  modelName?: string; // modelo de embeddings a usar
+  expansionTerms?: string[]; // términos adicionales para expandir la búsqueda
 }
 
 const SemanticSearchInput: React.FC<SemanticSearchInputProps> = ({
@@ -29,7 +32,10 @@ const SemanticSearchInput: React.FC<SemanticSearchInputProps> = ({
     mode: 'semantic',
     threshold: 70,
     includeFields: ['all'],
+    hybridAlpha: 0.7, // Valor predeterminado
+    expansionTerms: [], // Sin términos de expansión por defecto
   });
+  const [expansionInput, setExpansionInput] = useState('');
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
 
@@ -85,6 +91,29 @@ const SemanticSearchInput: React.FC<SemanticSearchInputProps> = ({
 
   const toggleOptions = () => {
     setIsOptionsOpen(!isOptionsOpen);
+  };
+
+  const handleAddExpansionTerm = () => {
+    if (!expansionInput.trim()) return;
+    
+    const newTerm = expansionInput.trim();
+    const newTerms = [...(searchOptions.expansionTerms || [])];
+    
+    // Evitar duplicados
+    if (!newTerms.includes(newTerm)) {
+      newTerms.push(newTerm);
+      
+      // Actualizar opciones
+      handleOptionChange({ expansionTerms: newTerms });
+    }
+    
+    // Limpiar input
+    setExpansionInput('');
+  };
+  
+  const handleRemoveExpansionTerm = (term: string) => {
+    const newTerms = (searchOptions.expansionTerms || []).filter(t => t !== term);
+    handleOptionChange({ expansionTerms: newTerms });
   };
 
   return (
@@ -170,6 +199,96 @@ const SemanticSearchInput: React.FC<SemanticSearchInputProps> = ({
               <span>Broader results</span>
               <span>Exact matches</span>
             </div>
+          </div>
+
+          {searchOptions.mode === 'hybrid' && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Hybrid Balance: {Math.round(searchOptions.hybridAlpha! * 100)}% Semantic / {Math.round((1 - searchOptions.hybridAlpha!) * 100)}% Keyword
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={searchOptions.hybridAlpha! * 100}
+                onChange={(e) => handleOptionChange({ hybridAlpha: parseInt(e.target.value) / 100 })}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>Keyword matching</span>
+                <span>Semantic meaning</span>
+              </div>
+            </div>
+          )}
+
+          {searchOptions.mode === 'semantic' || searchOptions.mode === 'hybrid' ? (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Embedding Model
+              </label>
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={searchOptions.modelName || "default"}
+                onChange={(e) => handleOptionChange({ modelName: e.target.value === "default" ? undefined : e.target.value })}
+              >
+                <option value="default">Default (multilingual-MiniLM-L12-v2)</option>
+                <option value="sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2 (English, faster)</option>
+                <option value="sentence-transformers/all-mpnet-base-v2">all-mpnet-base-v2 (English, higher quality)</option>
+                <option value="sentence-transformers/paraphrase-multilingual-mpnet-base-v2">paraphrase-multilingual-mpnet-base-v2 (Multilingual, higher quality)</option>
+              </select>
+              <div className="text-xs text-gray-500 mt-1">
+                Diferentes modelos pueden dar resultados más precisos dependiendo del idioma y tipo de búsqueda.
+              </div>
+            </div>
+          ) : null}
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Términos de Expansión
+            </label>
+            <div className="flex space-x-2 mb-2">
+              <input
+                type="text"
+                value={expansionInput}
+                onChange={(e) => setExpansionInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddExpansionTerm();
+                  }
+                }}
+                placeholder="Añadir término..."
+                className="flex-grow px-3 py-1 text-sm border border-gray-300 rounded-md"
+              />
+              <button
+                type="button"
+                onClick={handleAddExpansionTerm}
+                className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+              >
+                Añadir
+              </button>
+            </div>
+            
+            {searchOptions.expansionTerms && searchOptions.expansionTerms.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {searchOptions.expansionTerms.map((term, index) => (
+                  <span key={index} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                    {term}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExpansionTerm(term)}
+                      className="ml-1 text-blue-600 hover:text-blue-800"
+                    >
+                      &times;
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500 mt-1">
+                Añade términos relacionados para mejorar la búsqueda
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end">

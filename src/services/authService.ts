@@ -33,7 +33,7 @@ const removeToken = () => {
 export const authService = {
   async login(email: string, password: string): Promise<User> {
     try {
-      const response = await apiClient.post<LoginResponse>('/auth/login', {
+      const response = await apiClient.post<LoginResponse>('/api/auth/login', {
         email,
         password,
       });
@@ -48,7 +48,7 @@ export const authService = {
 
   async register(email: string, password: string, name: string): Promise<User> {
     try {
-      const response = await apiClient.post<RegisterResponse>('/auth/register', {
+      const response = await apiClient.post<RegisterResponse>('/api/auth/register', {
         email,
         password,
         name,
@@ -64,7 +64,7 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/auth/logout');
+      await apiClient.post('/api/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
       // Ignore errors on logout
@@ -81,7 +81,7 @@ export const authService = {
     }
     
     try {
-      const response = await apiClient.get<User>('/auth/me');
+      const response = await apiClient.get<User>('/api/auth/me');
       return response.data;
     } catch (error) {
       console.error('Get current user error:', error);

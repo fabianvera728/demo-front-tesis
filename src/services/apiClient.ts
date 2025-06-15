@@ -2,11 +2,11 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } f
 import { mockApiClient } from '@/mocks/mockApiClient';
 
 // Flag to determine if we should use mock API
-const USE_MOCK_API = true; // Set to false when you have a real backend
+const USE_MOCK_API = false; // Set to false when you have a real backend
 
 // Create base axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
