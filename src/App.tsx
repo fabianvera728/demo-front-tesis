@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from '@/context/AuthContext';
 import AuthRoutes from '@/features/auth/AuthRoutes';
 import DatasetRoutes from '@/features/datasets/DatasetRoutes';
+import IntegrationRoutes from '@/features/integrations/IntegrationRoutes';
 import Layout from '@/components/layout/Layout';
 import '@/app.css';
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<Navigate to="/datasets" replace />} />
             <Route path="/datasets/*" element={<DatasetRoutes />} />
+            <Route path="/integrations/*" element={<IntegrationRoutes />} />
           </Route>
           
           {/* Fallback route */}

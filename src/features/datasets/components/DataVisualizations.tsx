@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { DatasetRow, DatasetColumn } from '@/types/dataset';
 import SimilarityHeatmap from './SimilarityHeatmap';
 import WordCloud from './WordCloud';
-import BarChart from './BarChart';
+// import BarChart from './BarChart'; // Deshabilitado
 import RadarChart from './RadarChart';
 import SemanticContext from './SemanticContext';
 import FeatherIcon from 'feather-icons-react';
@@ -24,7 +24,7 @@ const DataVisualizations: React.FC<DataVisualizationsProps> = ({
   highlightedFields,
   onWordClick
 }) => {
-  const [activeTab, setActiveTab] = useState<'heatmap' | 'wordcloud' | 'barchart' | 'radar' | 'context'>('heatmap');
+  const [activeTab, setActiveTab] = useState<'heatmap' | 'wordcloud' | 'radar' | 'context'>('heatmap');
 
   if (!results.length) {
     return (
@@ -68,6 +68,8 @@ const DataVisualizations: React.FC<DataVisualizationsProps> = ({
             <FeatherIcon icon="cloud" size={16} className="mr-2" />
             Nube de Palabras
           </button>
+          {/* Pestaña de Características deshabilitada */}
+          {/*
           <button
             className={`py-3 px-4 text-sm font-medium flex items-center ${
               activeTab === 'barchart'
@@ -79,6 +81,7 @@ const DataVisualizations: React.FC<DataVisualizationsProps> = ({
             <FeatherIcon icon="bar-chart-2" size={16} className="mr-2" />
             Características
           </button>
+          */}
           <button
             className={`py-3 px-4 text-sm font-medium flex items-center ${
               activeTab === 'radar'
@@ -121,6 +124,8 @@ const DataVisualizations: React.FC<DataVisualizationsProps> = ({
             onWordClick={onWordClick}
           />
         )}
+        {/* Gráfica de Características deshabilitada */}
+        {/*
         {activeTab === 'barchart' && (
           <BarChart 
             results={results} 
@@ -129,6 +134,7 @@ const DataVisualizations: React.FC<DataVisualizationsProps> = ({
             highlightedFields={highlightedFields}
           />
         )}
+        */}
         {activeTab === 'radar' && (
           <RadarChart 
             results={results} 

@@ -74,6 +74,21 @@ const Sidebar: React.FC = () => {
           </NavLink>
 
           <NavLink 
+            to="/integrations" 
+            className={({ isActive }) => 
+              isActive 
+                ? 'bg-blue-100 text-blue-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md' 
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+            }
+          >
+            <FeatherIcon 
+              icon="link" 
+              className="mr-3 h-6 w-6 text-blue-500" 
+            />
+            Integraciones
+          </NavLink>
+
+          <NavLink 
             to="/analytics" 
             className={({ isActive }) => 
               isActive 
